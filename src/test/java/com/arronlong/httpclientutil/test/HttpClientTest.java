@@ -12,21 +12,21 @@ import org.apache.http.Header;
 import org.apache.http.client.HttpClient;
 
 import com.arronlong.httpclientutil.HttpClientUtil;
-import com.arronlong.httpclientutil.builder.HCB;
+import com.arronlong.httpclientutil.builder.CustomHttpClientBuilder;
 import com.arronlong.httpclientutil.common.HttpConfig;
 import com.arronlong.httpclientutil.common.HttpHeader;
 import com.arronlong.httpclientutil.exception.HttpProcessException;
 
-/** 
- * 
+/**
+ *
  * @author arron
- * @date 2015年11月1日 下午2:23:18 
- * @version 1.0 
+ * @date 2015年11月1日 下午2:23:18
+ * @version 1.0
  */
 public class HttpClientTest {
-	
+
 	public static void testOne() throws HttpProcessException{
-		
+
 		System.out.println("--------简单方式调用（默认post）--------");
 		String url = "http://tool.oschina.net/";
 		HttpConfig  config = HttpConfig.custom();
@@ -34,9 +34,9 @@ public class HttpClientTest {
 		String resp = HttpClientUtil.get(config.url(url));
 
 		System.out.println("请求结果内容长度："+ resp.length());
-		
+
 		System.out.println("\n#################################\n");
-		
+
 		System.out.println("--------加入header设置--------");
 		url="http://blog.csdn.net/xiaoxian8023";
 		//设置header信息
@@ -46,10 +46,10 @@ public class HttpClientTest {
 		System.out.println("请求结果内容长度："+ resp.length());
 
 		System.out.println("\n#################################\n");
-		
+
 		System.out.println("--------代理设置（绕过证书验证）-------");
 		url="https://www.facebook.com/";
-		HttpClient client= HCB.custom().timeout(10000).proxy("127.0.0.1", 8087).ssl().build();//采用默认方式（绕过证书验证）
+		HttpClient client = CustomHttpClientBuilder.custom().timeout(10000).proxy("127.0.0.1", 8087).ssl().build();// 采用默认方式（绕过证书验证）
 		//执行请求
 		resp = HttpClientUtil.get(config.client(client));
 		System.out.println("请求结果内容长度："+ resp.length());
@@ -71,7 +71,7 @@ public class HttpClientTest {
 			out.flush();
 			out.close();
 			System.out.println("--------下载测试+代理-------");
-			
+
 			out = new FileOutputStream(new File("d://aaa//001.png"));
 			HttpClientUtil.down(HttpConfig.custom().client(client).url(url).out(out));
 			out.flush();
@@ -82,9 +82,7 @@ public class HttpClientTest {
 
 		System.out.println("\n#################################\n");
 	}
-	
-	
-	
+
 	public static void testMutilTask() throws HttpProcessException{
 		// URL列表数组
 		String[] urls = {
@@ -92,13 +90,13 @@ public class HttpClientTest {
 				"http://blog.csdn.net/xiaoxian8023/article/details/49909359",
 				"http://blog.csdn.net/xiaoxian8023/article/details/49910127",
 				"http://blog.csdn.net/xiaoxian8023/article/details/49910885",
-				
+
 //				"http://blog.csdn.net/xiaoxian8023/article/details/49862725",
 //				"http://blog.csdn.net/xiaoxian8023/article/details/49834643",
 //				"http://blog.csdn.net/xiaoxian8023/article/details/49834615",
 //				"http://blog.csdn.net/xiaoxian8023/article/details/49834589",
 //				"http://blog.csdn.net/xiaoxian8023/article/details/49785417",
-//				
+				//
 //				"http://blog.csdn.net/xiaoxian8023/article/details/48679609",
 //				"http://blog.csdn.net/xiaoxian8023/article/details/48681987",
 //				"http://blog.csdn.net/xiaoxian8023/article/details/48710653",
@@ -115,19 +113,19 @@ public class HttpClientTest {
 //				"http://blog.csdn.net/xiaoxian8023/article/details/47057573",
 //				"http://blog.csdn.net/xiaoxian8023/article/details/45601347",
 //				"http://blog.csdn.net/xiaoxian8023/article/details/45569441",
-//				"http://blog.csdn.net/xiaoxian8023/article/details/43312929", 
+				// "http://blog.csdn.net/xiaoxian8023/article/details/43312929",
 				};
 		String[] imgurls ={"http://ss.bdimg.com/static/superman/img/logo/logo_white_fe6da1ec.png",
 				"https://scontent-hkg3-1.xx.fbcdn.net/hphotos-xaf1/t39.2365-6/11057093_824152007634067_1766252919_n.png"};
 		// 设置header信息
 		Header[] headers = HttpHeader.custom().userAgent("Mozilla/5.0").from("http://blog.csdn.net/newest.html").build();
-		HttpClient client= HCB.custom().timeout(10000).proxy("127.0.0.1", 8087).ssl().build();//采用默认方式（绕过证书验证）
-		
-		 long start = System.currentTimeMillis();        
+		HttpClient client = CustomHttpClientBuilder.custom().timeout(10000).proxy("127.0.0.1", 8087).ssl().build();// 采用默认方式（绕过证书验证）
+
+		long start = System.currentTimeMillis();
 	        try {
 				int pagecount = urls.length;
 				ExecutorService executors = Executors.newFixedThreadPool(pagecount);
-				CountDownLatch countDownLatch = new CountDownLatch(pagecount*10);         
+			CountDownLatch countDownLatch = new CountDownLatch(pagecount * 10);
 				for(int i = 0; i< pagecount*10;i++){
 					FileOutputStream out = new FileOutputStream(new File("d://aaa//"+(i+1)+".png"));
 				    //启动线程抓取
@@ -143,18 +141,18 @@ public class HttpClientTest {
 	        } finally {
 	            System.out.println("线程" + Thread.currentThread().getName() + ", 所有线程已完成，开始进入下一步！");
 	        }
-	         
+
 	        long end = System.currentTimeMillis();
 	        System.out.println("总耗时（毫秒）： -> " + (end - start));
 	        //(7715+7705+7616)/3= 23 036/3= 7 678.66---150=51.2
 	        //(9564+8250+8038+7604+8401)/5=41 857/5=8 371.4--150
 	        //(9803+8244+8188+8378+8188)/5=42 801/5= 8 560.2---150
 	}
-	
+
 	 static class GetRunnable implements Runnable {
 	        private CountDownLatch countDownLatch;
 	        private HttpConfig config = null;
-	        
+
 	        public GetRunnable setConfig(HttpConfig config){
 	        	this.config = config;
 	        	return this;
@@ -185,8 +183,8 @@ public class HttpClientTest {
 	                countDownLatch.countDown();
 	            }
 	        }
-	    }  
-	
+	}
+
 	public static void main(String[] args) throws Exception {
 		File file = new File("d://aaa");
 		if(!file.exists() && file.isDirectory()){

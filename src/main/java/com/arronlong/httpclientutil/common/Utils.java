@@ -24,19 +24,19 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/** 
+/**
  * 工具类
- * 
- * 		用于设定参数特定类型
- *		启用bebug模式，打印消息
- * 
+ *
+ * 用于设定参数特定类型 启用bebug模式，打印消息
+ *
  * @author arron
- * @version 1.0 
+ * @version 1.0
  */
 public class Utils {
-	
+
 	//传入参数特定类型
 	public static final String ENTITY_STRING="$ENTITY_STRING$";
 	public static final String ENTITY_FILE="$ENTITY_FILEE$";
@@ -45,21 +45,24 @@ public class Utils {
 	public static final String ENTITY_SERIALIZABLE="$ENTITY_SERIALIZABLE$";
 	public static final String ENTITY_MULTIPART="$ENTITY_MULTIPART$";
 	private static final List<String> SPECIAL_ENTITIY = Arrays.asList(ENTITY_STRING, ENTITY_BYTES, ENTITY_FILE, ENTITY_INPUTSTREAM, ENTITY_SERIALIZABLE, ENTITY_MULTIPART);
-	
 	/**
 	 * 是否开启debug，
 	 */
 	private static boolean debug = false;
-	private static final Logger logger = Logger.getLogger("HttpClient(异步)工具类");
+	private static final Logger logger = LoggerFactory.getLogger("HttpClient(Asyn) Utils");
 
 	/**
 	 * 检测url是否含有参数，如果有，则把参数加到参数列表中
-	 * 
-	 * @param url	资源地址
-	 * @param nvps	参数列表
-	 * @param encoding	编码
-	 * @return	返回去掉参数的url
-	 * @throws UnsupportedEncodingException 不支持的编码异常
+	 *
+	 * @param url
+	 *            资源地址
+	 * @param nvps
+	 *            参数列表
+	 * @param encoding
+	 *            编码
+	 * @return 返回去掉参数的url
+	 * @throws UnsupportedEncodingException
+	 *             不支持的编码异常
 	 */
 	public static String checkHasParas(String url, List<NameValuePair> nvps, String encoding) throws UnsupportedEncodingException {
 		// 检测url中是否存在参数
@@ -72,14 +75,18 @@ public class Utils {
 	}
 
 	/**
-	 * 
+	 *
 	 * 参数转换，将map中的参数，转到参数列表中
-	 * 
-	 * @param nvps				参数列表
-	 * @param map				参数列表（map）
-	 * @param encoding			编码
-	 * @return					返回HttpEntity
-	 * @throws UnsupportedEncodingException  不支持的编码异常
+	 *
+	 * @param nvps
+	 *            参数列表
+	 * @param map
+	 *            参数列表（map）
+	 * @param encoding
+	 *            编码
+	 * @return 返回HttpEntity
+	 * @throws UnsupportedEncodingException
+	 *             不支持的编码异常
 	 */
 	public static HttpEntity map2HttpEntity(List<NameValuePair> nvps, Map<String, Object> map, String encoding) throws UnsupportedEncodingException {
 		HttpEntity entity = null;
@@ -142,7 +149,7 @@ public class Utils {
 				            builder.addTextBody(e.getKey(), String.valueOf(e.getValue()), ContentType.create("text/plain", encoding));
 				        }
 						entity = builder.build();// 生成 HTTP POST 实体
-						
+
 						//强制去除contentType中的编码设置，否则，在某些情况下会导致上传失败
 						if(forceRemoveContentTypeCharset){
 							removeContentTypeCharset(encoding, entity);
@@ -164,9 +171,11 @@ public class Utils {
 
 	/**
 	 * 移除content-type中的charset
-	 * 
-	 * @param encoding	编码
-	 * @param entity	请求参数及数据信息
+	 *
+	 * @param encoding
+	 *            编码
+	 * @param entity
+	 *            请求参数及数据信息
 	 */
 	private static void removeContentTypeCharset(String encoding, HttpEntity entity) {
 		try {
@@ -174,9 +183,9 @@ public class Utils {
 			Field field = clazz.getDeclaredField("contentType");
 			field.setAccessible(true); //将字段的访问权限设为true：即去除private修饰符的影响
 			if(Modifier.isFinal(field.getModifiers())){
-				Field modifiersField = Field.class.getDeclaredField("modifiers"); //去除final修饰符的影响，将字段设为可修改的  
-				modifiersField.setAccessible(true);  
-				modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);  
+				Field modifiersField = Field.class.getDeclaredField("modifiers"); // 去除final修饰符的影响，将字段设为可修改的
+				modifiersField.setAccessible(true);
+				modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 			}
 			BasicHeader o = (BasicHeader) field.get(entity);
 			field.set(entity, new BasicHeader(HTTP.CONTENT_TYPE, o.getValue().replace("; charset="+encoding,"")));
@@ -190,14 +199,13 @@ public class Utils {
 			Utils.exception(e);
 		}
 	}
-	
-	
+
 	/**
-	 * 生成参数
-	 * 参数格式：k1=v1&amp;k2=v2
-	 * 
-	 * @param paras				参数列表
-	 * @return					返回参数列表（map）
+	 * 生成参数 参数格式：k1=v1&amp;k2=v2
+	 *
+	 * @param paras
+	 *            参数列表
+	 * @return 返回参数列表（map）
 	 */
 	public static Map<String,Object> buildParas(String paras){
 		String[] p = paras.split("&");
@@ -211,72 +219,79 @@ public class Utils {
 		}
 		return buildParas(ps);
 	}
-	
+
 	/**
-	 * 生成参数
-	 * 参数类型：{{"k1","v1"},{"k2","v2"}}
-	 * 
-	 * @param paras 				参数列表
-	 * @return						返回参数列表（map）
+	 * 生成参数 参数类型：{{"k1","v1"},{"k2","v2"}}
+	 *
+	 * @param paras
+	 *            参数列表
+	 * @return 返回参数列表（map）
 	 */
 	public static Map<String,Object> buildParas(String[][] paras){
-		// 创建参数队列    
+		// 创建参数队列
 		Map<String,Object> map = new HashMap<String, Object>();
 		for (String[] para: paras) {
 			map.put(para[0], para[1]);
 		}
 		return map;
 	}
-	
+
 	/**
 	 * 打印消息
-	 * 
-	 * @param msg	消息
+	 *
+	 * @param msg
+	 *            消息
 	 */
 	public static void info(String msg){
 		if(debug){
 			logger.info(msg);
 		}
 	}
-	
+
 	/**
 	 * 打印消息和异常堆栈
-	 * 
-	 * @param msg	异常消息
-	 * @param t		异常
+	 *
+	 * @param msg
+	 *            异常消息
+	 * @param t
+	 *            异常
 	 */
 	public static void infoException(String msg, Throwable t){
 		if(debug){
 			logger.info(msg, t);
 		}
 	}
-	
+
 	/**
 	 * 打印错误消息
-	 * 
-	 * @param msg	异常消息
+	 *
+	 * @param msg
+	 *            异常消息
 	 */
 	public static void error(String msg){
 		logger.error(msg);
 	}
-	
+
 	/**
 	 * 打印错误消息和异常堆栈
-	 * 
-	 * @param msg	异常消息
-	 * @param t		异常
+	 *
+	 * @param msg
+	 *            异常消息
+	 * @param t
+	 *            异常
 	 */
 	public static void errorException(String msg, Throwable t){
 		logger.error(msg, t);
 	}
-	
+
 	/**
 	 * 打印异常堆栈
-	 * 
-	 * @param t		异常
+	 *
+	 * @param t
+	 *            异常
 	 */
 	public static void exception(Throwable t){
-		logger.error(t);
+		logger.error("", t);
 	}
 
 	/**
