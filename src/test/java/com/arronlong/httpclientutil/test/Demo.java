@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.http.Header;
 import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 import com.arronlong.httpclientutil.HttpClientUtil;
 import com.arronlong.httpclientutil.builder.CustomHttpClientBuilder;
@@ -24,10 +25,13 @@ import com.arronlong.httpclientutil.exception.HttpProcessException;
 public class Demo {
 
 	public static void main(String[] args) throws HttpProcessException, FileNotFoundException {
+		java.lang.System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
+		CloseableHttpClient clienttemp = CustomHttpClientBuilder.custom().sslpv(SSLProtocolVersion.TLSv1_2).ssl()
+				.build();
 		String url = "https://github.com/Arronlong/httpclientutil";
 
 		//最简单的使用：
-		String html = HttpClientUtil.get(HttpConfig.custom().url(url));
+		String html = HttpClientUtil.get(HttpConfig.custom().client(clienttemp).url(url));
 		System.out.println(html);
 
 		//---------------------------------
